@@ -14,6 +14,7 @@
 ```bash
 git clone https://github.com/alankang25/manuscript.git
 cd manuscript
+'''
 
 ## Usage
 
