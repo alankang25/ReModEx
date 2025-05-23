@@ -3,7 +3,7 @@
 ## Table of Contents
 
 - [Installation](#installation)
-- 
+- [Pipeline](#pipeline)
 - [Usage](#usage)
 - [Configuration](#configuration)
 - [Examples](#examples)
@@ -14,7 +14,7 @@
 ```bash
 git clone https://github.com/alankang25/manuscript.git
 cd manuscript
-'''
+```
 
 ## Usage
 
