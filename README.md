@@ -16,10 +16,13 @@ git clone https://github.com/alankang25/manuscript.git
 cd manuscript
 ```
 
-## Usage
+## Pipeline
+# Below is an outline of the pipeline which takes in an ENCODE formatted TSV file, ATAC-seq BigWig and peak files pre- and post- treatment to list the importance of various chromatin features in explaining accessibility changes across treatment groups. In this example, data from BRG1/BRM Associated Factors Complex (BAF) inhibited GM12878 cells will be used.
 
-# The following project contains scripts used to run an ML feature importance analysis pipeline. It is able to assign an importance value to DNA-binding proteins and histone modifications based on their ChIP-seq data in predicting the change in accessibility upon different treatment groups. 
+## Usage
+# FRiP Filtering
+
+# Machine Learning Feature Analysis
 
 ## Congiguration
-
 # add function where different ML parameters are tweaked from the command line
