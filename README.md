@@ -35,7 +35,16 @@ conda activate manuscript-pipeline
 ## Usage
 ### FRiP Filtering
 
+```bash
+python FRiP_filter.py -i "INPUT_ENCODE_TSV" -m "MIN-PEAKS" -t "CHIP-SEQ_TYPE"
+```
+
+
+
 ### Machine Learning Feature Analysis
+```bash
+
+```
 
 ## Congiguration
 ### add function where different ML parameters are tweaked from the command line

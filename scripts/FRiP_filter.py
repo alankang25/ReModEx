@@ -296,10 +296,10 @@ def main():
     print("Metadata downloaded.")
 
     # Read metadata and download BED files
-    if args.type == "TF":
+    if type == "TF":
         accession_df = read_metadata_TF(min_peaks)
         print("TF metadata read.")
-    elif args.type == "histone":
+    elif type == "histone":
         accession_df = read_metadata_histone(min_peaks)
         print("Histone metadata read.")
     else:
