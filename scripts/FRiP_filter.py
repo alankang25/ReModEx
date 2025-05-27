@@ -284,6 +284,7 @@ def download_bed_file(accession_df, threads):
 
 
 def main():
+    #TODO: add functionality where distribution of peaks and frip values are plotted for user to determine threshold
     args = parse_args()
     input_file = args.input
     min_peaks = int(args.min_peaks)
