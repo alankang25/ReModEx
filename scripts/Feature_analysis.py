@@ -1,4 +1,5 @@
 #TODO: Clean up interim files and add comments
+#TODO: Add feature where you can exclude certain features (i.e. remove rows with certain features as 1)
 
 #importing libraries
 import pandas as pd
@@ -37,7 +38,7 @@ def parse_args():
     return args
 
 #--------------block for making feature matrix-------------------
-def make_feature_matrix(bed_list, feature_matrix):
+def make_feature_matrix(bed_list, feature_matrix_input):
     """
     Overlaps the ATAC-seq peaks with the features in the bed_list and returns a binary feature matrix.
     Parameters:
@@ -60,6 +61,7 @@ def make_feature_matrix(bed_list, feature_matrix):
     feature_matrix = pd.DataFrame(columns=['peak_name'] + [os.path.basename(f).split('.')[0] for f in bed_list])
     feature_matrix['peak_name'] = pd.read_csv("../data/output/final_merged_peaks.bed", sep="\t", header=None)[3]
     feature_matrix.set_index('peak_name', inplace=True)
+    feature_matrix['target'] = feature_matrix_input.set_index('peak_name')['target']
     for bed_file in bed_list:
         #get the name of the bed file without the path
         bed_name = os.path.basename(bed_file).split('.')[0]
@@ -169,8 +171,78 @@ def calculate_log2_fold_change(control_bigwig, treatment_bigwig, merged_peaks=".
     return merged_peaks_df[['peak_name', 'target']]
 
 def random_forest(feature_matrix, target_column='target'):
+    """
+    Train a Random Forest classifier on the feature matrix.
+    Parameters:
+    feature_matrix: pandas DataFrame with features as columns and ATAC-seq peaks as rows with target as log2 fold change
+    target_column: column name for the target variable (default is 'target')
+    """
+    #remove nan values from the feature matrix
+    feature_matrix = feature_matrix.dropna()
 
-    return
+    # 1 if log2 fold change is less than -1, 0 if other
+    feature_matrix[target_column] = (feature_matrix[target_column] < -1).astype(int)
+
+    #balance the dataset by undersampling
+    class_counts = feature_matrix[target_column].value_counts()
+    min_class_count = class_counts.min()
+    balanced_data = pd.concat([
+        feature_matrix[feature_matrix[target_column] == cls].sample(min_class_count, random_state=3)
+        for cls in class_counts.index
+    ])
+    # Shuffle the balanced data
+    balanced_data = balanced_data.sample(frac=1, random_state=3).reset_index(drop=True)
+    # Create the feature matrix
+    feature_matrix = balanced_data
+
+    # Split the data into features and target
+    X = feature_matrix.drop(columns=[target_column])
+    y = feature_matrix[target_column]
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=3)
+
+    # Initialize the Random Forest classifier
+    rf_classifier = RandomForestClassifier(n_estimators=100, random_state=3)
+    # Fit the classifier to the training data
+    rf_classifier.fit(X_train, y_train)
+
+    # Make predictions on the test set
+    y_pred = rf_classifier.predict(X_test)
+    # Calculate accuracy
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Random Forest Classifier Accuracy: {accuracy:.2f}")
+    # Print classification report
+    print("Classification Report:")
+    print(classification_report(y_test, y_pred))
+    # Print confusion matrix
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test, y_pred))
+    
+    return rf_classifier
+
+def random_forest_feature_importance(rf_classifier):
+    """
+    Calculate and print feature importance from the Random Forest classifier.
+    Parameters:
+    rf_classifier: trained Random Forest classifier
+    """
+    # Get feature importances
+    importances = rf_classifier.feature_importances_
+    # Create a DataFrame for feature importances
+    feature_importance_df = pd.DataFrame({
+        'feature': rf_classifier.feature_names_in_,
+        'importance': importances
+    })
+    # Sort by importance
+    feature_importance_df = feature_importance_df.sort_values(by='importance', ascending=False)
+    
+    print("Feature Importances:")
+    print(feature_importance_df)
+
+    return feature_importance_df
+
+
 
 def main():
     # Define the list of bed files containing features
@@ -195,7 +267,12 @@ def main():
     feature_matrix = make_feature_matrix(bed_list, feature_df)
 
     #random forest classifier
+    rf_classifier = random_forest(feature_matrix)
+    feature_importance_df = random_forest_feature_importance(rf_classifier)
+    # Save feature importance to a csv file
+    feature_importance_df.to_csv("../data/output/rf_feature_importance.csv", index=False)
 
+    #ridge regularized ridge regression
 
     return 
 
