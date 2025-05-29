@@ -35,13 +35,28 @@ conda activate manuscript-pipeline
 ### FRiP and Peak Count Filtering
 
 ```bash
-python FRiP_filter.py -i "INPUT_ENCODE_TSV" -m "MIN-PEAKS" -t "CHIP-SEQ_TYPE"
+# For this demo, a tsv with the following filters from ENCODE was downloaded:
+# biosample=GM12878, Output Type=IDR thresholded peaks, File format=bed, Assay Title=TF ChIP-seq, Status=Released
+
+    python FRiP_filter.py -i "INPUT_ENCODE_TSV" -t "CHIP-SEQ_TYPE"
+```
+
+### To reset the ENCODE BED download directory
+```bash
+    python Reset_bed.py
 ```
 
 ### Random Forest and Linear Regression Feature Analysis
 ```bash
-
+    python Feature_analysis.py -c "PATH_TO_CONTROL_FILES" -t "PATH_TO_TREATMENT_FILES"
 ```
 
 ## Configuration
-### add function where different ML parameters are tweaked from the command line
+### If needed, there are some configurations available for the pipeline.
+```bash
+# While filtering for the highest FRiP value in a target, you can also set a minimum peak number cutoff. For example: 
+    python FRiP_filter.py -i "INPUT_ENCODE_TSV" -t "CHIP-SEQ_TYPE" -m 1000 
+#will remove all BED files with less than 1000 peaks total. This way, you can filter out files that have low signal.
+
+
+#
