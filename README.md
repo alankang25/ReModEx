@@ -80,4 +80,27 @@ python script/Feature_analysis.py -d "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV" -x 
 ### The following diagram shows the directory paths of generated plots & files: 
 ![Pipeline diagram showing data flow and model steps](docs/output_directories.svg)
 
+```bash
 
+# Under manuscript, two subdirectories (scripts and data) exist:
+
+manuscript/
+├── scripts/
+│   └── # python scripts FRiP_filter.py, Feature_analysis.py, and Reset_bed.py. These files should not be altered.
+└── data/
+    └── # input and output data files
+
+
+# Under data, three subdrectories (metadata, input, and output) exist
+
+data/
+├── metadata/
+│   └── # ENCODE metadata and configuration files
+├── input/
+│   └── # raw input files such as BigWig, BED, and TSV files
+└── output/
+    └── # processed results, plots, and output.csv
+
+# Execution of Reset_bed.py clears all metadata JSON files and ChIP-seq bed files under metadata and input subdirectories. This is to ensure that both histone ChIP-seq and TF ChIP-seq BED files can be processed even with different data tracking schemes and naming conventions.
+
+```
