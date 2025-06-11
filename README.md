@@ -40,16 +40,14 @@ conda activate manuscript-pipeline
 ```
 
 ## Inputs
-There are two main files needed as input for this pipeline:
-```bash
-    1. ENCODE .tsv file
+### There are two main files needed as input for this pipeline:
+1. ENCODE .tsv file
 
     #TODO: need to get pictures and add description about what an ENCODE .tsv file is.
 
-    2. Differential peak calling file
+2. Differential peak calling file
 
     #Specify what columns are needed for the analysis (BAFdep and )
-```
 
 
 ## Pipeline
