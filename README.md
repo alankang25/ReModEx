@@ -70,13 +70,14 @@ python script/FRiP_filter.py -i "INPUT_ENCODE_TSV" -t "CHIP-SEQ_TYPE" -m 1000
 ```bash
 # Wile generating the feature matrix, you can choose to exclude samples that overlap with certain features. For example: 
 
-python script/Feature_analysis.py -c "PATH_TO_CONTROL_FILES" -t "PATH_TO_TREATMENT_FILES" -x CTCF
+python script/Feature_analysis.py -d "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV" -x CTCF
 
 # will remove any regions that are CTCF bound from the feature matrix
 
-#TODO: add more functionality to script (focus on hyperparameters)
 ```
 
 ## Outputs 
 ### The following diagram shows the directory paths of generated plots & files: 
 ![Pipeline diagram showing data flow and model steps](docs/output_directories.svg)
+
+
