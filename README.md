@@ -11,9 +11,11 @@
 
 ## Overview
 This repo contains python scripts used to:
+```bash
     1. Download ChIP-seq BED files from the ENCODE database
     2. Train ML models to identify accessible chromatin that respond to drug treatment
     3. Conduct feature analyses to understand what features (TF binding/histone mods) best explain the differential response of accessible chromatin elments after treatmet
+```
 
 The ChIP-seq BED files downloaded from ENCODE are filtered for the highest Fraction of Reads in Peaks (FRiP) value within a ChIP target, and the ML modles trained under this pipeline is a Random Forest Clssifier (RFC) and a Ridge Regularized Linear Regression (RR) implemented via the SciKit Learn library.
 
@@ -39,6 +41,7 @@ conda activate manuscript-pipeline
 
 ## Inputs
 There are two main files needed as input for this pipeline:
+```bash
     1. ENCODE .tsv file
 
     #TODO: need to get pictures and add description about what an ENCODE .tsv file is.
@@ -46,6 +49,7 @@ There are two main files needed as input for this pipeline:
     2. Differential peak calling file
 
     #Specify what columns are needed for the analysis (BAFdep and )
+```
 
 
 ## Pipeline
