@@ -6,12 +6,8 @@ import pandas as pd
 import numpy as np
 import os
 import argparse
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from sklearn.linear_model import Ridge
 
-#--------------block for parsing arguments-------------------
+#----------------block for parsing arguments---------------------
 def parse_args():
     p = argparse.ArgumentParser(
         description="Take ENCODE tsv and download BED files with highest FRiP scores"
@@ -36,7 +32,7 @@ def parse_args():
     if not os.path.exists(args.treatment_ATAC):
         raise FileNotFoundError(f"Treatment ATAC-seq directory {args.treatment_ATAC} does not exist.")
     return args
-
+#--------------------------end of block--------------------------
 #--------------block for making feature matrix-------------------
 def make_feature_matrix(bed_list, feature_matrix_input):
     """
@@ -122,7 +118,6 @@ def modify_args(control_ATAC, treatment_ATAC):
     #return bed and bigwig files
     return control_bed, treatment_bed, control_bigwig, treatment_bigwig
 
-
 def make_peak_set(control_bed, treatment_bed):
     """
     Make a set of ATAC-seq peaks from control and treatment ATAC-seq bed files.
@@ -169,6 +164,13 @@ def calculate_log2_fold_change(control_bigwig, treatment_bigwig, merged_peaks=".
     merged_peaks_df['target'] = np.log2(merged_peaks_df['treatment'] / merged_peaks_df['control'])
 
     return merged_peaks_df[['peak_name', 'target']]
+#--------------------------end of block--------------------------
+
+#-------------------block for machine learning-------------------
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.linear_model import Ridge
 
 def random_forest(feature_matrix, target_column='target'):
     """
@@ -242,7 +244,70 @@ def random_forest_feature_importance(rf_classifier):
 
     return feature_importance_df
 
+def ridge_regression(feature_matrix, target_column='target'):
+    """
+    Train a Ridge regularized linear regression model on the feature matrix.
+    Parameters:
+    feature_matrix: pandas DataFrame with features as columns and ATAC-seq peaks as rows with target as log2 fold change
+    target_column: column name for the target variable (default is 'target')
+    """
+    #remove nan values from the feature matrix
+    feature_matrix = feature_matrix.dropna()
 
+    # 1 if log2 fold change is less than -1, 0 if other
+    feature_matrix[target_column] = (feature_matrix[target_column] < -1).astype(int)
+
+    #balance the dataset by undersampling
+    class_counts = feature_matrix[target_column].value_counts()
+    min_class_count = class_counts.min()
+    balanced_data = pd.concat([
+        feature_matrix[feature_matrix[target_column] == cls].sample(min_class_count, random_state=3)
+        for cls in class_counts.index
+    ])
+    # Shuffle the balanced data
+    balanced_data = balanced_data.sample(frac=1, random_state=3).reset_index(drop=True)
+    
+    # Create the feature matrix
+    feature_matrix = balanced_data
+
+    # Split the data into features and target
+    X = feature_matrix.drop(columns=[target_column])
+    y = feature_matrix[target_column]
+
+    # Initialize the Ridge regression model
+    ridge_model = Ridge(alpha=1.0, random_state=3)
+    
+    # Fit the model to the data
+    ridge_model.fit(X, y)
+
+    # Print coefficients
+    print("Ridge Regression Coefficients:")
+    print(ridge_model.coef_)
+
+    return ridge_model
+
+def calculate_feature_importance_ridge(ridge_model, feature_names):
+    """
+    Calculate feature importance from the Ridge regression model.
+    Parameters:
+    ridge_model: trained Ridge regression model
+    feature_names: list of feature names
+    """
+    # Get coefficients
+    coefficients = ridge_model.coef_
+    # Create a DataFrame for feature importances
+    feature_importance_df = pd.DataFrame({
+        'feature': feature_names,
+        'importance': coefficients
+    })
+    # Sort by importance
+    feature_importance_df = feature_importance_df.sort_values(by='importance', ascending=False)
+    
+    print("Feature Importances from Ridge Regression:")
+    print(feature_importance_df)
+
+    return feature_importance_df
+#--------------------------end of block--------------------------
 
 def main():
     # Define the list of bed files containing features
@@ -268,11 +333,19 @@ def main():
 
     #random forest classifier
     rf_classifier = random_forest(feature_matrix)
-    feature_importance_df = random_forest_feature_importance(rf_classifier)
-    # Save feature importance to a csv file
-    feature_importance_df.to_csv("../data/output/rf_feature_importance.csv", index=False)
+    rf_feature_importance_df = random_forest_feature_importance(rf_classifier)
 
-    #ridge regularized ridge regression
+    #ridge regularized linear regression
+    ridge_model = ridge_regression(feature_matrix)
+    ridge_feature_importance_df = calculate_feature_importance_ridge(ridge_model, feature_matrix.columns[:-1])
+
+    #concat feature importances --> column names are 'feature', 'MDI_importance', 'Ridge_coef'
+    feature_importance_df = pd.concat([
+        rf_feature_importance_df.rename(columns={'importance': 'MDI_importance'}),
+        ridge_feature_importance_df.rename(columns={'importance': 'Ridge_coef'})
+    ], axis=1)
+    feature_importance_df = feature_importance_df.loc[:, ~feature_importance_df.columns.duplicated()]
+    feature_importance_df.to_csv("../data/output/feature_importance.csv", index=False)
 
     return 
 

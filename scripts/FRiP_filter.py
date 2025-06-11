@@ -7,6 +7,8 @@ import requests
 import json
 import argparse
 
+from pathlib import Path
+
 def parse_args():
     p = argparse.ArgumentParser(
         description="Take ENCODE tsv and download BED files with highest FRiP scores"
@@ -22,6 +24,7 @@ def parse_args():
         "-m", "--min_peaks",
         required=False,
         default=0,
+        type=int,
         help="Minimum number of peaks to be considered a valid, high quality file"
     )
 
@@ -56,21 +59,38 @@ def split_into_chunks(lst, n):
 
     return chunks
 
-def download_metadata(accession_list, metadata_dict):
-    headers = {'accept': 'application/json'}
-    counter = 0
-    for accession in accession_list:
-        if counter % 10 == 0:
+META_DIR = Path("../data/metadata")
+META_DIR.mkdir(parents=True, exist_ok=True)
+
+def download_metadata(accession_list, metadata_dict, lock):
+    """
+    Worker executed inside each thread.
+    Adds a lock‑protected write to the shared dict so it’s thread‑safe.
+    """
+    headers = {"accept": "application/json"}
+
+    for i, accession in enumerate(accession_list):
+        # crude throttle – consider a smarter rate‑limiter later
+        if i % 10 == 0 and i:
             time.sleep(1)
-        url = 'https://www.encodeproject.org/files/' + accession
-        response = requests.get(url, headers=headers).json()
 
-        #save as json file
-        with open( '../data/metadata/' + accession + '.json', 'w') as f:
-            json.dump(response, f)
+        url = f"https://www.encodeproject.org/files/{accession}"
+        try:
+            resp = requests.get(url, headers=headers, timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception as e:
+            print(f"[WARN] {accession} failed: {e}")
+            continue
 
-        metadata_dict[accession] = response
-        counter += 1
+        # save JSON to disk
+        (META_DIR / f"{accession}.json").write_text(json.dumps(data))
+
+        # ---------- critical section ----------
+        with lock:                          # <‑‑ only this part needs protection
+            metadata_dict[accession] = data
+        # -------------------------------------
+
 
 def metadata_run(ENCODE_tsv, n):
     """
@@ -97,8 +117,11 @@ def metadata_run(ENCODE_tsv, n):
     metadata_dict = {}
     threads = []
 
+    # Create a lock for thread-safe access to the metadata_dict
+    lock = threading.Lock()
+
     for chunk in bed_chunks:
-        thread = threading.Thread(target=download_metadata, args=(chunk, metadata_dict))
+        thread = threading.Thread(target=download_metadata, args=(chunk, metadata_dict, lock))
         threads.append(thread)
         thread.start()
     for thread in threads:
