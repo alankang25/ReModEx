@@ -95,12 +95,11 @@ manuscript/
 
 data/
 ├── metadata/
-│   └── # ENCODE metadata and configuration files
+│   └── # ENCODE ChIP metadata files
 ├── input/
-│   └── # raw input files such as BigWig, BED, and TSV files
+│   └── # input BED files of Histone and TF ChIP for construction of feature matrix
 └── output/
-    └── # processed results, plots, and output.csv
-
-# Execution of Reset_bed.py clears all metadata JSON files and ChIP-seq bed files under metadata and input subdirectories. This is to ensure that both histone ChIP-seq and TF ChIP-seq BED files can be processed even with different data tracking schemes and naming conventions.
+    └── # analysis plots and feature_importance.csv
 
 ```
+> Execution of Reset_bed.py clears all metadata JSON files and ChIP-seq bed files under metadata and input subdirectories. This is to ensure that both histone ChIP-seq and TF ChIP-seq BED files can be processed even with different data tracking schemes and naming conventions.
