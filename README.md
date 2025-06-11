@@ -1,8 +1,8 @@
 # manuscript
 
 ## Table of Contents
-
 - [Overview](#Overview)
+- [Inputs](#Inputs)
 - [Installation](#installation)
 - [Pipeline](#pipeline)
 - [Usage](#usage)
@@ -10,11 +10,15 @@
 - [Outputs](#outputs)
 
 ## Overview
+This repo contains python scripts used to:
+    1. Download ChIP-seq BED files from the ENCODE database
+    2. Train ML models to identify accessible chromatin that respond to drug treatment
+    3. Conduct feature analyses to understand what features (TF binding/histone mods) best explain the differential response of accessible chromatin elments after treatmet
 
+The ChIP-seq BED files downloaded from ENCODE are filtered for the highest Fraction of Reads in Peaks (FRiP) value within a ChIP target, and the ML modles trained under this pipeline is a Random Forest Clssifier (RFC) and a Ridge Regularized Linear Regression (RR) implemented via the SciKit Learn library.
 
 ## Installation
-
-### To install, clone this repository:
+To install, clone this repository:
 ```bash
 # 1. Clone the github repo
 git clone https://github.com/alankang25/manuscript.git
@@ -24,7 +28,7 @@ cd manuscript/script
 ```
 > Execution of scripts in ~/manuscript/scripts/ directory is necessary for proper execution.
 
-### This pipeline uses a conda environment to manage dependencies. To install with Conda:
+This pipeline uses a conda environment to manage dependencies. To install with Conda:
 ```bash
 # 1. Create environment (first time only)
 conda env create -f environment.yml
@@ -33,16 +37,24 @@ conda env create -f environment.yml
 conda activate manuscript-pipeline
 ```
 
-## Pipeline
-Below is an outline of the pipeline which takes in an ENCODE formatted TSV file, ATAC-seq BigWig and peak files pre- and post- treatment to list the importance of various chromatin features in explaining accessibility changes across treatment groups. This output is organized in a .csv file named output.csv. In this example, data from BRG1/BRM Associated Factors Complex (BAF) inhibited GM12878 cells will be used.
+## Inputs
+There are two main files needed as input for this pipeline:
+    1. ENCODE .tsv file
 
+    #TODO: need to get pictures and add description about what an ENCODE .tsv file is.
+
+    2. Differential peak calling file
+
+    #Specify what columns are needed for the analysis (BAFdep and )
+
+
+## Pipeline
+Below is an outline of the pipeline which takes in an ENCODE formatted TSV file,
 
 ![Pipeline diagram showing data flow and model steps](docs/pipeline_diagram.svg)
 
 ## Usage
-
 ### FRiP and Peak Count Filtering
-
 ```bash
 # For this demo, a tsv with the following filters from ENCODE was downloaded:
 # biosample=GM12878, Output Type=IDR thresholded peaks, File format=bed, Assay Title=TF ChIP-seq, Status=Released
