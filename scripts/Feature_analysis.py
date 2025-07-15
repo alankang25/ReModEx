@@ -61,6 +61,13 @@ def parse_args():
         help="If set, will calculate permutation importances for the Random Forest model."
     )
 
+    p.add_argument(
+        "-j", "--threads",
+        type=int,
+        default=1,
+        help="Number of parallel threads to use for the pipeline. Default is 1."
+    )
+
     args = p.parse_args()
 
     return args
@@ -147,7 +154,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.inspection import permutation_importance
 from sklearn.model_selection import ParameterGrid
 
-def random_forest(feature_matrix, target_column, fold_change):
+def random_forest(feature_matrix, target_column, fold_change, threads=1):
     """
     Train a Random Forest classifier on the feature matrix.
     Parameters:
@@ -188,7 +195,7 @@ def random_forest(feature_matrix, target_column, fold_change):
     best_score = 0
     best_params = None
     for params in ParameterGrid(param_grid):
-        clf = RandomForestClassifier(random_state=3, n_jobs=8, **params)
+        clf = RandomForestClassifier(random_state=3, n_jobs=threads, **params)
         clf.fit(X_train, y_train)
         val_score = clf.score(X_val, y_val)
         if val_score > best_score:
@@ -201,7 +208,7 @@ def random_forest(feature_matrix, target_column, fold_change):
     # Train final model with best hyperparameters on train+val, test on test set
     X_trainval = pd.concat([X_train, X_val])
     y_trainval = pd.concat([y_train, y_val])
-    rf_classifier = RandomForestClassifier(random_state=3, n_jobs=8, **best_params)
+    rf_classifier = RandomForestClassifier(random_state=3, n_jobs=threads, **best_params)
     rf_classifier.fit(X_trainval, y_trainval)
 
     # Evaluate on test set
@@ -234,7 +241,7 @@ def random_forest(feature_matrix, target_column, fold_change):
     
     return rf_classifier, X_val, y_val
 
-def random_forest_feature_importance(rf_classifier, X_eval, y_eval, permutation):
+def random_forest_feature_importance(rf_classifier, X_eval, y_eval, permutation, threads=1):
     # MDI importances
     mdi_imps = rf_classifier.feature_importances_
     fi_df = pd.DataFrame({
@@ -257,7 +264,7 @@ def random_forest_feature_importance(rf_classifier, X_eval, y_eval, permutation)
         # Permutation importances
         perm = permutation_importance(
             rf_classifier, X_eval, y_eval,
-            n_repeats=10, random_state=3, n_jobs=8
+            n_repeats=10, random_state=3, n_jobs=threads
         )
         perm_df = pd.DataFrame({
             'feature': rf_classifier.feature_names_in_,
@@ -438,6 +445,7 @@ def main():
     fc_column = args.fold_change
     exclude_features = args.exclude_features
     permutation = args.p
+    threads = args.threads
     print(f"Excluding features: {exclude_features}")
 
     # Make feature matrix 
@@ -447,8 +455,8 @@ def main():
         feature_matrix = remove_features(feature_matrix, exclude_features)
 
     #random forest classifier
-    rf_classifier, X_val, y_val = random_forest(feature_matrix, diff_peaks_column, fc_column)
-    rf_feature_importance_df = random_forest_feature_importance(rf_classifier, X_val, y_val, permutation)
+    rf_classifier, X_val, y_val = random_forest(feature_matrix, diff_peaks_column, fc_column, threads)
+    rf_feature_importance_df = random_forest_feature_importance(rf_classifier, X_val, y_val, permutation, threads)
 
     #ridge regularized linear regression
     ridge_df = ridge_regression(feature_matrix , fc_column, diff_peaks_column)
