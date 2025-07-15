@@ -69,7 +69,7 @@ python Reset_bed.py
 
 ### Random Forest and Linear Regression Feature Analysis
 ```bash
-python Feature_analysis.py -c "PATH_TO_CONTROL_FILES" -t "PATH_TO_TREATMENT_FILES"
+python Feature_analysis.py -d "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV"
 ```
 
 ## Configuration
@@ -96,8 +96,6 @@ python Feature_analysis.py -d "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV" -x CTCF
 
 ## Outputs 
 ### The following diagram shows the directory paths of generated plots & files: 
-![Pipeline diagram showing data flow and model steps](docs/output_directories.svg)
-
 ```bash
 
 # Under manuscript, two subdirectories (scripts and data) exist:

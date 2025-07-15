@@ -70,7 +70,6 @@ def download_metadata(accession_list, metadata_dict, lock):
     headers = {"accept": "application/json"}
 
     for i, accession in enumerate(accession_list):
-        # crude throttle – consider a smarter rate‑limiter later
         if i % 10 == 0 and i:
             time.sleep(1)
 
@@ -83,13 +82,10 @@ def download_metadata(accession_list, metadata_dict, lock):
             print(f"[WARN] {accession} failed: {e}")
             continue
 
-        # save JSON to disk
         (META_DIR / f"{accession}.json").write_text(json.dumps(data))
 
-        # ---------- critical section ----------
-        with lock:                          # <‑‑ only this part needs protection
+        with lock:
             metadata_dict[accession] = data
-        # -------------------------------------
 
 
 def metadata_run(ENCODE_tsv, n):
@@ -279,18 +275,24 @@ def download_BED_file_helper(target, accession):
 def download_bed_file(accession_df, threads):
     """
     Make accession dictionary with target as key and accession as value. Download bed files from ENCODE.
+    Logs each downloaded accession and target.
     """
-    #keep first 3 columns
+    # keep first 3 columns
     accession_df = accession_df[['accession', 'target', 'dataset']]
 
-    #make dict (key = target, value = accession) from pandas dataframe
+    # make dict (key = target, value = accession) from pandas dataframe
     accession_dict = accession_df.set_index('target')['accession'].to_dict()
 
     active = []  # list of currently running Thread objects
+    downloaded = []  # list to keep track of downloaded (target, accession)
+
+    def download_and_log(target, accession):
+        download_BED_file_helper(target, accession)
+        downloaded.append((target, accession))
 
     for target, accession in accession_dict.items():
         # start a new thread for this download
-        t = threading.Thread(target=download_BED_file_helper, args=(target, accession), daemon=True)
+        t = threading.Thread(target=download_and_log, args=(target, accession), daemon=True)
         t.start()
         active.append(t)
 
@@ -303,7 +305,23 @@ def download_bed_file(accession_df, threads):
     for t in active:
         t.join()
 
-    print("All BED files downloaded")
+
+#TODO: Logging method to keep track of which files were downloaded and their frip scores
+def logging(accession_df):
+    """
+    Log the downloaded BED files and their FRiP scores.
+    """
+    log_dir = Path("../data/log")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "log.txt"
+    i = 1
+    while log_file.exists():
+        log_file = log_dir / f"log_{i}.txt"
+        i += 1
+    with log_file.open("w") as f:
+        for _, row in accession_df.iterrows():
+            f.write(f"{row['accession']}\t{row['target']}\t{row['dataset']}\t{row['frip']}\n")
+    print(f"Log file created at {log_file}")
 
 
 def main():
@@ -332,6 +350,7 @@ def main():
     # Download BED files
     download_bed_file(accession_df, parallel)
 
+    logging(accession_df)
 
 if __name__ == "__main__":
     main()
