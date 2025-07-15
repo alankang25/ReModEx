@@ -100,20 +100,20 @@ python FRiP_filter.py -i ../input/gm12878_histone.tsv -t histone -m 1000
 python Feature_analysis.py -d ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -x CTCF
 
 # will remove any regions that are CTCF bound from the feature matrix
-
+```
+```bash
 # Permutation importance is another form of feature importance which can be calculated from random forests. To calculate adding the option -p:
 
 python Feature_analysis.py -d ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -p
 
 # will calculate permutation based importance.
-
+```
+```bash
 # lastly, you can set the number of threads to be used with the -j parameter:
 
 python Feature_analysis.py -d ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -j 4
 
 # the default number of threads is set to 1. 
-
-
 ```
 
 ## Outputs 
