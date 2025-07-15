@@ -43,11 +43,14 @@ conda activate manuscript-pipeline
 
     An ENCODE TSV file is a summary of the ENCODE data file report found on this link: https://www.encodeproject.org/report/?type=File
 
-    ![In the file portal, you can choose filters to narrow down on specific fiels of interest.](docs/ENCODE_1.png)
+    In the file portal, you can choose filters to narrow down on specific fiels of interest.
+    ![ENCODE files portal](docs/ENCODE_1.png)
 
-    ![After selecting all filters, click the [Report] button on the top of the page to generate a list of files](docs/ENCODE_2.png)
+    After selecting all filters, click the [Report] button on the top of the page to generate a list of files
+    ![ENCODE generating report](docs/ENCODE_2.png)
 
-    ![After the report has been generated, click the [Download TSV] button to download the final TSV file which includes all files of interest.](docs/ENCODE_3.png)
+    After the report has been generated, click the [Download TSV] button to download the final TSV file which includes all files of interest.
+    ![ENCODE downloading TSV](docs/ENCODE_3.png)
 
     
     
