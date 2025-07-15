@@ -41,7 +41,19 @@ conda activate manuscript-pipeline
 ### There are two main files needed as input for this pipeline:
 1. ENCODE .tsv file
 
-    #TODO: need to get pictures and add description about what an ENCODE .tsv file is.
+    An ENCODE TSV file is a summary of the ENCODE data file report found on this link: https://www.encodeproject.org/report/?type=File
+
+    In the file portal, you can choose filters to narrow down on specific fiels of interest.
+    !(docs/ENCODE_1.png)
+
+    After selecting all filters, click the [Report] button on the top of the page to generate a list of files
+    !(docs/ENCODE_2.png)
+
+    After the report has been generated, click the [Download TSV] button to download the final TSV file which includes all files of interest.
+    !(docs/ENCODE_3.png)
+
+    
+    
 
 2. Differential peak calling file
 
@@ -57,19 +69,19 @@ Below is an outline of the pipeline which takes in an ENCODE formatted TSV file,
 ### FRiP and Peak Count Filtering
 ```bash
 # For this demo, a tsv with the following filters from ENCODE was downloaded:
-# biosample=GM12878, Output Type=IDR thresholded peaks, File format=bed, Assay Title=TF ChIP-seq, Status=Released
+# biosample=GM12878, Output Type=IDR thresholded peaks, File format=bed, Assay Title=TF ChIP-seq, Status=Released, Genome Assembly=GRCh38
 
-python FRiP_filter.py -i "INPUT_ENCODE_TSV" -t "CHIP-SEQ_TYPE"
+python FRiP_filter.py -i "INPUT_ENCODE_TSV_PATH" -t "CHIP-SEQ_TYPE"
 ```
 
-### To reset the ENCODE BED download directory
+### To reset the ENCODE Metadata & BED download directory
 ```bash
 python Reset_bed.py 
 ```
 
 ### Random Forest and Linear Regression Feature Analysis
 ```bash
-python Feature_analysis.py -d "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV"
+python Feature_analysis.py -d "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV" -fc "FOLD_CHANGE_COLUMN" -d "DIFFERENTIAL_ACCESSIBILITY_COLUMN"
 ```
 
 ## Configuration
@@ -77,11 +89,10 @@ python Feature_analysis.py -d "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV"
 ```bash
 # While filtering for the highest FRiP value in a target, you can also set a minimum peak number cutoff. For example: 
 
-python FRiP_filter.py -i "INPUT_ENCODE_TSV" -t "CHIP-SEQ_TYPE" -m 1000 
+python FRiP_filter.py -i ../input/gm12878_histone.tsv -t histone -m 1000 
 
-# will remove all BED files with less than 1000 peaks total. This way, you can filter out files that have low signal.
+# will remove all BED files with less than 1000 peaks total, filtering out files with low signal.
 
-#TODO: add more functionality to script
 ```
 
 ### For the Feature_analysis script, here are the following configs:
