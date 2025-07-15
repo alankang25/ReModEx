@@ -94,27 +94,23 @@ python FRiP_filter.py -i ../input/gm12878_histone.tsv -t histone -m 1000
 ```
 
 ### For the Feature_analysis script, here are the following configs:
+Wile generating the feature matrix, you can choose to exclude samples that overlap with certain features with parameter -x. For example: 
 ```bash
-# Wile generating the feature matrix, you can choose to exclude samples that overlap with certain features with parameter -x. For example: 
-
 python Feature_analysis.py -d ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -x CTCF
-
-# will remove any regions that are CTCF bound from the feature matrix
 ```
-```bash
-# Permutation importance is another form of feature importance which can be calculated from random forests. To calculate adding the option -p:
+will remove any regions that are CTCF bound from the feature matrix
 
+Permutation importance is another form of feature importance which can be calculated from random forests. To calculate adding the option -p:
+```bash
 python Feature_analysis.py -d ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -p
-
-# will calculate permutation based importance.
 ```
+will calculate permutation based importance.
+
+Lastly, you can set the number of threads to be used with the -j parameter:
 ```bash
-# lastly, you can set the number of threads to be used with the -j parameter:
-
 python Feature_analysis.py -d ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -j 4
-
-# the default number of threads is set to 1. 
 ```
+the default number of threads is set to 1. 
 
 ## Outputs 
 ### The following diagram shows the directory paths of generated plots & files: 
