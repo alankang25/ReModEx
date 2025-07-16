@@ -46,7 +46,7 @@ In the file portal, you can choose filters to narrow down on specific files of i
 ![ENCODE files portal](docs/ENCODE_1.png)
 
 After selecting all filters, click the [Report] button on the top of the page to generate a list of files
-![ENCODE generating repoårt](docs/ENCODE_2.png)
+![ENCODE generating report](docs/ENCODE_2.png)
 
 After the report has been generated, click the [Download TSV] button to download the final TSV file which includes all files of interest.
 ![ENCODE downloading TSV](docs/ENCODE_3.png)
@@ -79,7 +79,7 @@ python Reset_bed.py
 
 ### Random Forest and Linear Regression Feature Analysis
 ```bash
-python Feature_analysis.py -d "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV" -fc "FOLD_CHANGE_COLUMN" -d "DIFFERENTIAL_ACCESSIBILITY_COLUMN"
+python Feature_analysis.py -i "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV" -fc "FOLD_CHANGE_COLUMN" -d "DIFFERENTIAL_ACCESSIBILITY_COLUMN"
 ```
 
 ## Configuration
@@ -96,19 +96,19 @@ python FRiP_filter.py -i ../input/gm12878_histone.tsv -t histone -m 1000
 ### For the Feature_analysis script, here are the following configs:
 Wile generating the feature matrix, you can choose to exclude samples that overlap with certain features with parameter -x. For example: 
 ```bash
-python Feature_analysis.py -d ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -x CTCF
+python Feature_analysis.py -i ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -x CTCF
 ```
 will remove any regions that are CTCF bound from the feature matrix
 
 Permutation importance is another form of feature importance which can be calculated from random forests. To calculate adding the option -p:
 ```bash
-python Feature_analysis.py -d ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -p
+python Feature_analysis.py -i ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -p
 ```
 will calculate permutation based importance.
 
 Lastly, you can set the number of threads to be used with the -j parameter:
 ```bash
-python Feature_analysis.py -d ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -j 4
+python Feature_analysis.py -i ../input/differential_peak_accessibility.tsv -fc logfc -d BAFdep -j 4
 ```
 the default number of threads is set to 1. 
 

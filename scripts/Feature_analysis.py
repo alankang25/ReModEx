@@ -149,7 +149,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_curve, auc, precision_recall_curve
 from sklearn.linear_model import Ridge
 import matplotlib.pyplot as plt
-import seaborn as sns
+import seaborn as sns 
 from sklearn.preprocessing import StandardScaler
 from sklearn.inspection import permutation_importance
 from sklearn.model_selection import ParameterGrid
@@ -323,7 +323,7 @@ def ridge_regression(feature_matrix, target_column, change_column):
     X = scaler.fit_transform(X_df)
 
     #subsample 70% of the data and run ridge regression 10 times with random seed --> save the average coefficients with standard deviation
-    indices = [feature_matrix.sample(frac=0.7, random_state=42 + i).index for i in range(10)]
+    indices = [feature_matrix.sample(frac=0.7, random_state=3 + i).index for i in range(10)]
 
     coefficients = {col: [] for col in X_df.columns}
 
