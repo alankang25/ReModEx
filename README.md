@@ -23,10 +23,9 @@ To install, clone this repository:
 # 1. Clone the github repo
 git clone https://github.com/alankang25/manuscript.git
 
-# 2. Set current directory to script
-cd manuscript/script
+# 2. Set current directory to repo
+cd ./manuscript
 ```
-> Execution of scripts in ~/manuscript/scripts/ directory is necessary for proper execution.
 
 This pipeline uses a conda environment to manage dependencies. To install with Conda:
 ```bash
@@ -34,8 +33,12 @@ This pipeline uses a conda environment to manage dependencies. To install with C
 conda env create -f environment.yml
 
 # 2. Activate new environment
-conda activate manuscript-pipeline
+conda activate manuscript
+
+# 3. Change directory into script
+cd ./script
 ```
+> Execution of scripts in ~/manuscript/scripts/ directory is necessary for proper execution.
 
 ## Inputs
 ### There are two main files needed as input for this pipeline:
