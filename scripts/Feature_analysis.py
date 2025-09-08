@@ -262,10 +262,14 @@ def random_forest_feature_importance(rf_classifier, X_eval, y_eval, permutation,
     if permutation:
         # If permutation is True, calculate permutation importances
         # Permutation importances
-        perm = permutation_importance(
-            rf_classifier, X_eval, y_eval,
-            n_repeats=10, random_state=3, n_jobs=threads
+        from joblib import parallel_backend
+
+        with parallel_backend("threading", n_jobs=threads):
+            perm = permutation_importance(
+                rf_classifier, X_eval, y_eval,
+                n_repeats=10, random_state=3, n_jobs=threads
         )
+
         perm_df = pd.DataFrame({
             'feature': rf_classifier.feature_names_in_,
             'MDI_importance': fi_df['importance'],

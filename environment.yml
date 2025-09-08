@@ -1,5 +1,6 @@
 name: manuscript
 channels:
+  - anaconda
   - bioconda
   - defaults
 dependencies:
@@ -22,9 +23,9 @@ dependencies:
   - brotlicffi=1.0.9.2=py312h6a678d5_1
   - bzip2=1.0.8=h5eee18b_6
   - c-ares=1.19.1=h5eee18b_0
-  - ca-certificates=2025.2.25=h06a4308_0
+  - ca-certificates=2025.7.15=h06a4308_0
   - cairo=1.16.0=he5ede1b_6
-  - certifi=2025.6.15=py312h06a4308_0
+  - certifi=2025.8.3=py312h06a4308_0
   - cffi=1.17.1=py312h1fdaa30_1
   - charset-normalizer=3.3.2=pyhd3eb1b0_0
   - comm=0.2.1=py312h06a4308_0
@@ -55,7 +56,7 @@ dependencies:
   - ipywidgets=8.1.5=py312h06a4308_0
   - jedi=0.19.2=py312h06a4308_0
   - jinja2=3.1.6=py312h06a4308_0
-  - joblib=1.4.2=py312h06a4308_0
+  - joblib=1.5.1=py312h06a4308_0
   - jpeg=9e=h5eee18b_3
   - json5=0.9.25=py312h06a4308_0
   - jsonschema=4.23.0=py312h06a4308_0
@@ -137,7 +138,7 @@ dependencies:
   - numpy-base=2.3.1=py312h06ae042_0
   - openjpeg=2.5.2=h0d4d230_1
   - openldap=2.6.4=h42fbc30_0
-  - openssl=3.0.16=h5eee18b_0
+  - openssl=3.0.17=h5eee18b_0
   - overrides=7.4.0=py312h06a4308_0
   - packaging=24.2=py312h06a4308_0
   - pandas=2.2.3=py312h6a678d5_0

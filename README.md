@@ -89,13 +89,17 @@ python Feature_analysis.py -i "PATH_TO_DIFFERENTIAL_PEAK_CALLING_TSV" -fc "FOLD_
 
 ## Configuration
 ### If needed, here are some configurations available for the FRiP_filter script.
+
+While filtering for the highest FRiP value in a target, you can also set a minimum peak number cutoff. For example: 
 ```bash
-# While filtering for the highest FRiP value in a target, you can also set a minimum peak number cutoff. For example: 
+python FRiP_filter.py -i ../input/gm12878_tf.tsv -m 1000 
+```
+will remove all BED files with less than 1000 peaks total, filtering out files with low signal.
 
-python FRiP_filter.py -i ../input/gm12878_histone.tsv -t histone -m 1000 
+Furthermore, if you wish to multithread the BED file downloading process, you can set the numer of threads to use with -p:
 
-# will remove all BED files with less than 1000 peaks total, filtering out files with low signal.
-
+```bash
+python FRiP_filter.py -i ../input/gm12878_tf.tsv -p 8  # uses 8 threads
 ```
 
 ### For the Feature_analysis script, here are the following configs:

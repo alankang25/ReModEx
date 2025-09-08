@@ -29,13 +29,6 @@ def parse_args():
     )
 
     p.add_argument(
-        "-t", "--type",
-        required=True,
-        choices=["histone", "TF"],
-        help="Specifying histone or TF TSV file"
-    )
-
-    p.add_argument(
         "-p", "--parallel",
         required=False,
         default=8,
@@ -123,90 +116,7 @@ def metadata_run(ENCODE_tsv, n):
     for thread in threads:
         thread.join()
 
-def read_metadata_TF(min_peaks):
-    """
-    Downloads BED file with highest frip for each target. Excludes files with less than threshold # of peaks.
-    """
-
-    # Create the output directory if it doesn't exist
-    os.makedirs("../data/bed", exist_ok=True)
-    bed_json_path = '../data/metadata/'
-
-    # Get data from JSON files
-    BED_frip_dict = {}
-    BED_dataset_dict = {}
-    BED_target_dict = {}
-    BED_reproducible_peaks = {}
-
-    for json_file in os.listdir(bed_json_path):
-        with open(bed_json_path + json_file) as f:
-            data = json.load(f)
-            if len(data['quality_metrics']) != 0:
-                if 'frip' in data['quality_metrics'][0]:
-                    frip = data['quality_metrics'][0]['frip']
-                elif len(data['quality_metrics']) == 2 and 'frip' in data['quality_metrics'][1]:
-                    frip = data['quality_metrics'][1]['frip']
-                else:
-                    frip = None
-            else:
-                frip = None
-
-            if len(data['quality_metrics']) != 0:
-                if 'reproducible_peaks' in data['quality_metrics'][0]:
-                    reproducible_peaks = data['quality_metrics'][0]['reproducible_peaks']
-                elif len(data['quality_metrics']) == 2 and 'reproducible_peaks' in data['quality_metrics'][1]:
-                    reproducible_peaks = data['quality_metrics'][1]['reproducible_peaks']
-                else:
-                    reproducible_peaks = None
-        
-                BED_frip_dict[json_file] = frip
-
-            BED_reproducible_peaks[json_file] = reproducible_peaks
-            dataset = data['dataset']
-            BED_dataset_dict[json_file] = dataset
-            target = data['target']['label']
-            BED_target_dict[json_file] = target
-    
-    # make into dataframe
-    #save to df
-    df_final = pd.DataFrame.from_dict(BED_frip_dict, orient='index', columns=['frip'])
-
-    #add reproducible_peaks column
-    df_final['reproducible_peaks'] = df_final.index
-    df_final['reproducible_peaks'] = df_final['reproducible_peaks'].map(BED_reproducible_peaks)
-
-    #add dataset column
-    df_final['dataset'] = df_final.index
-    df_final['dataset'] = df_final['dataset'].map(BED_dataset_dict)
-    #keep element 2 of dataset values using / as delimiter
-    df_final['dataset'] = df_final['dataset'].str.split('/').str[2]
-
-    #add target column
-    df_final['target'] = df_final.index
-    df_final['target'] = df_final['target'].map(BED_target_dict)
-
-    #add accession column which is index
-    df_final['accession'] = df_final.index
-    df_final['accession'] = df_final['accession'].str[:-5]
-
-    #reset index
-    df_final.reset_index(drop=True, inplace=True)
-
-    #order columns as accession, target, dataset, frip
-    df_final = df_final[['accession', 'target', 'dataset', 'frip', 'reproducible_peaks']]
-
-    #order by frip
-    df_final = df_final.sort_values(by='frip', ascending=False)
-
-    #keep first instance of target
-    df_final = df_final.drop_duplicates(subset='target', keep='first')
-
-    #keep only rows with reproducible_peaks > min_peaks
-    df_final = df_final[df_final['reproducible_peaks'] > min_peaks]
-
-    return df_final
-
-def read_metadata_histone(min_peaks):
+def read_metadata():
     # Create the output directory if it doesn't exist
     os.makedirs("../data/bed", exist_ok=True)
     bed_json_path = '../data/metadata/'
@@ -262,8 +172,6 @@ def read_metadata_histone(min_peaks):
 
     #order columns as accession,target,dataset,frip
     df_final = df_final[['accession', 'target', 'dataset', 'frip']]
-
-    #TODO: add peaks columns and check if > min_peaks
     
     return df_final
 
@@ -305,8 +213,18 @@ def download_bed_file(accession_df, threads):
     for t in active:
         t.join()
 
+def drop_min_peaks(min_peaks):
+    """
+    Drops bed files with line counts less than min_peaks. --> gzipped bedfile
+    """
+    bed_dir = Path("../data/bed")
+    for bed_file in bed_dir.glob("*.bed.gz"):
+        with os.popen(f"zcat {bed_file} | wc -l") as f:
+            line_count = int(f.read().strip())
+            if line_count < min_peaks:
+                os.remove(bed_file)
+                print(f"Dropped {bed_file} with {line_count} peaks")
 
-#TODO: Logging method to keep track of which files were downloaded and their frip scores
 def logging(accession_df):
     """
     Log the downloaded BED files and their FRiP scores.
@@ -325,12 +243,10 @@ def logging(accession_df):
 
 
 def main():
-    #TODO: add functionality where distribution of peaks and frip values are plotted for user to determine threshold
     args = parse_args()
     input_file = args.input
     min_peaks = int(args.min_peaks)
     parallel = args.parallel
-    type = args.type
 
     # Download metadata
     print("Downloading metadata...")
@@ -338,17 +254,16 @@ def main():
     print("Metadata downloaded.")
 
     # Read metadata and download BED files
-    if type == "TF":
-        accession_df = read_metadata_TF(min_peaks)
-        print("TF metadata read.")
-    elif type == "histone":
-        accession_df = read_metadata_histone(min_peaks)
-        print("Histone metadata read.")
-    else:
-        raise ValueError("Invalid type specified. Use 'histone' or 'TF'.")
+    accession_df = read_metadata()
+    print(f"Metadata read for tsv: {input_file}")
     
     # Download BED files
     download_bed_file(accession_df, parallel)
+
+    # Drop BED files with line counts less than min_peaks
+    if min_peaks > 0:
+        drop_min_peaks(min_peaks)
+        print(f"Dropped BED files with line counts less than {min_peaks}")
 
     logging(accession_df)
 
