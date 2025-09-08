@@ -58,8 +58,10 @@ The ENCODE TSV can now be used as the input for the FRiP_filter.py script.
 
 ### 2. Differential peak calling file
 
-    #Specify what columns are needed for the analysis (Significant loss of accessibility & LogFC)
+As input for Feature_analysis.py, a .tsv file needs to be provided with individual peaks as rows and two columns:
 
+1. A binary change/no change column
+2. A continuous Log Fold Change column
 
 ## Pipeline
 Below is an outline of the pipeline which takes in an ENCODE formatted TSV file,
