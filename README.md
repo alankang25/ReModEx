@@ -63,6 +63,8 @@ As input for Feature_analysis.py, a .tsv file needs to be provided with individu
 1. A binary change/no change column
 2. A continuous Log Fold Change column
 
+In our examples, we will use differental peak accessibility calls from DESeq2 between control and BAFi treated GM12878 cells which yeild both a change/no_change column and a log fold change column.
+
 ## Pipeline
 Below is an outline of the pipeline which takes in an ENCODE formatted TSV file,
 
